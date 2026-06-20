@@ -1,0 +1,61 @@
+@model NetworkManager.Models.MaintenanceLog
+@using NetworkManager.Models
+@{
+    ViewData["Title"] = "แก้ไขบันทึกการดูแล";
+}
+
+<div class="breadcrumb-custom">
+    <a asp-action="Index"><i class="bi bi-tools me-1"></i>ประวัติการดูแล</a>
+    <i class="bi bi-chevron-right"></i>
+    <span>แก้ไขบันทึก</span>
+</div>
+
+<div class="page-header">
+    <h2><i class="bi bi-pencil me-2 text-primary"></i>แก้ไขบันทึกการดูแล</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> กลับ
+    </a>
+</div>
+
+<div class="card" style="max-width:640px">
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+            <input asp-for="CreatedAt" type="hidden" />
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="DeviceId" class="form-label">อุปกรณ์</label>
+                    <select asp-for="DeviceId" class="form-select" asp-items="ViewBag.DeviceList">
+                        <option value="">— เลือกอุปกรณ์ —</option>
+                    </select>
+                    <span asp-validation-for="DeviceId" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Date" class="form-label"></label>
+                    <input asp-for="Date" type="datetime-local" class="form-control"
+                           value="@Model.Date.ToString("yyyy-MM-ddTHH:mm")" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="WorkType" class="form-label"></label>
+                    <select asp-for="WorkType" class="form-select"
+                            asp-items="Html.GetEnumSelectList<WorkType>()"></select>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Technician" class="form-label"></label>
+                    <input asp-for="Technician" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="col-12 d-flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> บันทึก
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">ยกเลิก</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

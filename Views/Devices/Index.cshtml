@@ -1,0 +1,129 @@
+@model IEnumerable<NetworkManager.Models.Device>
+@using NetworkManager.Models
+@{
+    ViewData["Title"] = "อุปกรณ์ทั้งหมด";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-hdd-rack-fill me-2 text-primary"></i>อุปกรณ์ทั้งหมด</h2>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> เพิ่มอุปกรณ์
+    </a>
+</div>
+
+<!-- Filter Bar -->
+<form method="get" class="filter-bar">
+    <div>
+        <label class="form-label mb-1">ค้นหา</label>
+        <input type="text" name="search" value="@ViewBag.Search" class="form-control"
+               placeholder="ชื่อ, IP, สถานที่..." style="width:220px" />
+    </div>
+    <div>
+        <label class="form-label mb-1">ประเภท</label>
+        <select name="type" class="form-select" style="width:140px">
+            <option value="">ทั้งหมด</option>
+            @foreach (var t in Enum.GetValues<DeviceType>())
+            {
+                <option value="@t" selected="@(ViewBag.Type == t.ToString() ? "selected" : null)">@t</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label class="form-label mb-1">สถานะ</label>
+        <select name="status" class="form-select" style="width:140px">
+            <option value="">ทั้งหมด</option>
+            @foreach (var s in Enum.GetValues<DeviceStatus>())
+            {
+                <option value="@s" selected="@(ViewBag.Status == s.ToString() ? "selected" : null)">@s</option>
+            }
+        </select>
+    </div>
+    <div class="d-flex gap-2 align-items-end">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search"></i> ค้นหา
+        </button>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-x-circle"></i> ล้าง
+        </a>
+    </div>
+</form>
+
+<!-- Device Table -->
+<div class="card">
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-hdd-rack"></i>
+                <p>ไม่พบอุปกรณ์ที่ตรงกับเงื่อนไข</p>
+                <a asp-action="Create" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-circle"></i> เพิ่มอุปกรณ์แรก
+                </a>
+            </div>
+        }
+        else
+        {
+            <table class="table-custom w-100">
+                <thead>
+                    <tr>
+                        <th>ชื่ออุปกรณ์</th>
+                        <th>ประเภท</th>
+                        <th>IP Address</th>
+                        <th>MAC Address</th>
+                        <th>ตำแหน่ง</th>
+                        <th>สถานะ</th>
+                        <th>ตรวจสอบล่าสุด</th>
+                        <th style="width:130px">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in Model)
+                    {
+                        <tr>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@d.Id"
+                                   class="text-decoration-none fw-500 text-primary">
+                                    <i class="bi @(d.Type == DeviceType.Router ? "bi-router" : d.Type == DeviceType.Switch ? "bi-pc-display-horizontal" : "bi-server") me-1"></i>
+                                    @d.Name
+                                </a>
+                            </td>
+                            <td>
+                                <span class="type-badge type-@d.Type.ToString().ToLower()">@d.Type</span>
+                            </td>
+                            <td><code>@d.IpAddress</code></td>
+                            <td><code class="text-muted">@(d.MacAddress ?? "—")</code></td>
+                            <td class="text-muted">@(d.Location ?? "—")</td>
+                            <td>
+                                <span class="status-badge @d.Status.ToString().ToLower()">
+                                    <span class="status-dot"></span>@d.Status
+                                </span>
+                            </td>
+                            <td class="text-muted" style="font-size:12px">
+                                @(d.LastChecked?.ToString("HH:mm dd/MM/yy") ?? "ยังไม่ได้ตรวจ")
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-action="Details" asp-route-id="@d.Id"
+                                       class="btn btn-sm btn-outline-primary" title="รายละเอียด">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@d.Id"
+                                       class="btn btn-sm btn-outline-secondary" title="แก้ไข">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@d.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" title="ลบ"
+                                                onclick="return confirm('ลบอุปกรณ์ @d.Name ?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

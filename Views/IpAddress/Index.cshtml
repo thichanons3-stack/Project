@@ -1,0 +1,149 @@
+@model IEnumerable<NetworkManager.Models.IpAssignment>
+@{
+    ViewData["Title"] = "IP Address (IPAM)";
+}
+
+<div class="page-header">
+    <h2><i class="bi bi-ethernet me-2 text-primary"></i>IP Address Management</h2>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> เพิ่ม IP
+    </a>
+</div>
+
+<!-- Filter -->
+<form method="get" class="filter-bar">
+    <div>
+        <label class="form-label mb-1">ค้นหา</label>
+        <input type="text" name="search" value="@ViewBag.Search" class="form-control"
+               placeholder="IP หรือ หมายเหตุ..." style="width:220px" />
+    </div>
+    <div>
+        <label class="form-label mb-1">สถานะ</label>
+        <select name="assigned" class="form-select" style="width:150px">
+            <option value="">ทั้งหมด</option>
+            <option value="true" selected="@(ViewBag.Assigned == true ? "selected" : null)">ถูกใช้งาน</option>
+            <option value="false" selected="@(ViewBag.Assigned == false ? "selected" : null)">ว่าง</option>
+        </select>
+    </div>
+    <div class="d-flex gap-2 align-items-end">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> ค้นหา</button>
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> ล้าง</a>
+    </div>
+</form>
+
+<!-- Summary -->
+<div class="row g-3 mb-4">
+    <div class="col-auto">
+        <div class="stat-card" style="padding:12px 20px">
+            <div class="stat-icon amber" style="width:36px;height:36px;font-size:16px">
+                <i class="bi bi-ethernet"></i>
+            </div>
+            <div>
+                <div class="stat-value" style="font-size:20px">@Model.Count()</div>
+                <div class="stat-label">IP ทั้งหมด</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="stat-card" style="padding:12px 20px">
+            <div class="stat-icon red" style="width:36px;height:36px;font-size:16px">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div>
+                <div class="stat-value" style="font-size:20px">@Model.Count(i => i.IsAssigned)</div>
+                <div class="stat-label">ถูกใช้งาน</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="stat-card" style="padding:12px 20px">
+            <div class="stat-icon green" style="width:36px;height:36px;font-size:16px">
+                <i class="bi bi-circle"></i>
+            </div>
+            <div>
+                <div class="stat-value" style="font-size:20px">@Model.Count(i => !i.IsAssigned)</div>
+                <div class="stat-label">ว่าง</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-ethernet"></i>
+                <p>ยังไม่มี IP Address ในระบบ</p>
+                <a asp-action="Create" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-circle"></i> เพิ่ม IP แรก
+                </a>
+            </div>
+        }
+        else
+        {
+            <table class="table-custom w-100">
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>Subnet Mask</th>
+                        <th>Gateway</th>
+                        <th>อุปกรณ์</th>
+                        <th>สถานะ</th>
+                        <th>หมายเหตุ</th>
+                        <th style="width:100px">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ip in Model)
+                    {
+                        <tr>
+                            <td><code class="fw-bold">@ip.Address</code></td>
+                            <td><code class="text-muted">@(ip.SubnetMask ?? "—")</code></td>
+                            <td><code class="text-muted">@(ip.Gateway ?? "—")</code></td>
+                            <td>
+                                @if (ip.Device != null)
+                                {
+                                    <a asp-controller="Devices" asp-action="Details" asp-route-id="@ip.DeviceId"
+                                       class="text-decoration-none text-primary">
+                                        <i class="bi bi-hdd me-1"></i>@ip.Device.Name
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (ip.IsAssigned)
+                                {
+                                    <span class="status-badge online"><span class="status-dot"></span>ถูกใช้งาน</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge unknown"><span class="status-dot"></span>ว่าง</span>
+                                }
+                            </td>
+                            <td class="text-muted">@(ip.Description ?? "—")</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-action="Edit" asp-route-id="@ip.Id"
+                                       class="btn btn-sm btn-outline-secondary" title="แก้ไข">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@ip.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('ลบ IP @ip.Address ?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

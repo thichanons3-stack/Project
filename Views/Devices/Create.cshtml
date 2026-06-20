@@ -1,0 +1,66 @@
+@model NetworkManager.Models.Device
+@using NetworkManager.Models
+@{
+    ViewData["Title"] = "เพิ่มอุปกรณ์";
+}
+
+<div class="breadcrumb-custom">
+    <a asp-action="Index"><i class="bi bi-hdd-rack-fill me-1"></i>อุปกรณ์</a>
+    <i class="bi bi-chevron-right"></i>
+    <span>เพิ่มอุปกรณ์ใหม่</span>
+</div>
+
+<div class="page-header">
+    <h2><i class="bi bi-plus-circle me-2 text-primary"></i>เพิ่มอุปกรณ์ใหม่</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> กลับ
+    </a>
+</div>
+
+<div class="card" style="max-width:700px">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" placeholder="เช่น Core Router 01" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Type" class="form-label"></label>
+                    <select asp-for="Type" class="form-select"
+                            asp-items="Html.GetEnumSelectList<DeviceType>()"></select>
+                    <span asp-validation-for="Type" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="IpAddress" class="form-label"></label>
+                    <input asp-for="IpAddress" class="form-control" placeholder="192.168.1.x" />
+                    <span asp-validation-for="IpAddress" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="MacAddress" class="form-label"></label>
+                    <input asp-for="MacAddress" class="form-control" placeholder="AA:BB:CC:DD:EE:FF" />
+                    <span asp-validation-for="MacAddress" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Location" class="form-label"></label>
+                    <input asp-for="Location" class="form-control" placeholder="เช่น Server Room, Floor 3" />
+                    <span asp-validation-for="Location" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Notes" class="form-label"></label>
+                    <textarea asp-for="Notes" class="form-control" rows="3"
+                              placeholder="หมายเหตุเพิ่มเติม..."></textarea>
+                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                </div>
+                <div class="col-12 d-flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> บันทึก
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">ยกเลิก</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

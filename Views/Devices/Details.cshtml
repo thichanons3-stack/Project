@@ -1,0 +1,176 @@
+@model NetworkManager.Models.Device
+@using NetworkManager.Models
+@{
+    ViewData["Title"] = "รายละเอียดอุปกรณ์";
+}
+
+<div class="breadcrumb-custom">
+    <a asp-action="Index"><i class="bi bi-hdd-rack-fill me-1"></i>อุปกรณ์</a>
+    <i class="bi bi-chevron-right"></i>
+    <span>@Model.Name</span>
+</div>
+
+<div class="page-header">
+    <div>
+        <h2>
+            <i class="bi @(Model.Type == DeviceType.Router ? "bi-router" : Model.Type == DeviceType.Switch ? "bi-pc-display-horizontal" : "bi-server") me-2 text-primary"></i>
+            @Model.Name
+        </h2>
+        <span class="type-badge type-@Model.Type.ToString().ToLower() mt-1">@Model.Type</span>
+        <span class="status-badge @Model.Status.ToString().ToLower() ms-2">
+            <span class="status-dot"></span>@Model.Status
+        </span>
+    </div>
+    <div class="d-flex gap-2">
+        <form asp-action="PingNow" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-broadcast"></i> Ping ตอนนี้
+            </button>
+        </form>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+            <i class="bi bi-pencil"></i> แก้ไข
+        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> กลับ
+        </a>
+    </div>
+</div>
+
+<!-- Device Info -->
+<div class="card mb-4">
+    <div class="card-header">
+        <span><i class="bi bi-info-circle me-2"></i>ข้อมูลอุปกรณ์</span>
+        <small class="text-muted">ตรวจสอบล่าสุด: @(Model.LastChecked?.ToString("HH:mm dd/MM/yyyy") ?? "ยังไม่ได้ตรวจ")</small>
+    </div>
+    <div class="card-body">
+        <div class="detail-grid">
+            <div class="detail-item">
+                <label>ชื่ออุปกรณ์</label>
+                <div class="value">@Model.Name</div>
+            </div>
+            <div class="detail-item">
+                <label>ประเภท</label>
+                <div class="value">@Model.Type</div>
+            </div>
+            <div class="detail-item">
+                <label>IP Address</label>
+                <div class="value">@Model.IpAddress</div>
+            </div>
+            <div class="detail-item">
+                <label>MAC Address</label>
+                <div class="value">@(Model.MacAddress ?? "—")</div>
+            </div>
+            <div class="detail-item">
+                <label>ตำแหน่ง</label>
+                <div class="value" style="font-family:inherit">@(Model.Location ?? "—")</div>
+            </div>
+            <div class="detail-item">
+                <label>วันที่เพิ่ม</label>
+                <div class="value" style="font-family:inherit">@Model.CreatedAt.ToString("dd/MM/yyyy")</div>
+            </div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <div class="mt-2">
+                <label class="form-label" style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted)">หมายเหตุ</label>
+                <p class="mb-0">@Model.Notes</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Maintenance Log -->
+<div class="card mb-4">
+    <div class="card-header">
+        <span><i class="bi bi-tools me-2"></i>ประวัติการดูแล (@Model.MaintenanceLogs.Count รายการ)</span>
+        <a asp-controller="Maintenance" asp-action="Create" asp-route-deviceId="@Model.Id"
+           class="btn btn-sm btn-primary">
+            <i class="bi bi-plus"></i> เพิ่มบันทึก
+        </a>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.MaintenanceLogs.Any())
+        {
+            <div class="empty-state py-4">
+                <i class="bi bi-journal-text"></i>
+                <p>ยังไม่มีบันทึกการดูแลรักษา</p>
+            </div>
+        }
+        else
+        {
+            <table class="table-custom w-100">
+                <thead>
+                    <tr>
+                        <th>วันที่</th>
+                        <th>ประเภทงาน</th>
+                        <th>ผู้ดำเนินการ</th>
+                        <th>รายละเอียด</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model.MaintenanceLogs)
+                    {
+                        <tr>
+                            <td>@log.Date.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <span class="work-badge work-@log.WorkType.ToString().ToLower()">@log.WorkType</span>
+                            </td>
+                            <td>@log.Technician</td>
+                            <td style="max-width:300px">@log.Description</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-controller="Maintenance" asp-action="Edit" asp-route-id="@log.Id"
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-controller="Maintenance" asp-action="Delete" asp-route-id="@log.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('ลบบันทึกนี้?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<!-- IP Assignments -->
+@if (Model.IpAssignments.Any())
+{
+    <div class="card">
+        <div class="card-header">
+            <span><i class="bi bi-ethernet me-2"></i>IP Address ที่เชื่อมโยง</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table-custom w-100">
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>Subnet Mask</th>
+                        <th>Gateway</th>
+                        <th>หมายเหตุ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ip in Model.IpAssignments)
+                    {
+                        <tr>
+                            <td><code>@ip.Address</code></td>
+                            <td><code class="text-muted">@(ip.SubnetMask ?? "—")</code></td>
+                            <td><code class="text-muted">@(ip.Gateway ?? "—")</code></td>
+                            <td>@(ip.Description ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

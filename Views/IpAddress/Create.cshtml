@@ -1,0 +1,56 @@
+@model NetworkManager.Models.IpAssignment
+@{
+    ViewData["Title"] = "เพิ่ม IP Address";
+}
+
+<div class="breadcrumb-custom">
+    <a asp-action="Index"><i class="bi bi-ethernet me-1"></i>IPAM</a>
+    <i class="bi bi-chevron-right"></i>
+    <span>เพิ่ม IP</span>
+</div>
+
+<div class="page-header">
+    <h2><i class="bi bi-plus-circle me-2 text-primary"></i>เพิ่ม IP Address</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> กลับ
+    </a>
+</div>
+
+<div class="card" style="max-width:600px">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Address" class="form-label"></label>
+                    <input asp-for="Address" class="form-control" placeholder="192.168.1.x" />
+                    <span asp-validation-for="Address" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="SubnetMask" class="form-label"></label>
+                    <input asp-for="SubnetMask" class="form-control" placeholder="255.255.255.0" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Gateway" class="form-label"></label>
+                    <input asp-for="Gateway" class="form-control" placeholder="192.168.1.1" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DeviceId" class="form-label">อุปกรณ์ที่ใช้งาน (ถ้ามี)</label>
+                    <select asp-for="DeviceId" class="form-select" asp-items="ViewBag.DeviceList">
+                        <option value="">— ไม่ระบุ (ว่าง) —</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label"></label>
+                    <input asp-for="Description" class="form-control" placeholder="หมายเหตุ..." />
+                </div>
+                <div class="col-12 d-flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> บันทึก
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">ยกเลิก</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

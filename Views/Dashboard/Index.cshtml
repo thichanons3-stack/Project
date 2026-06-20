@@ -1,0 +1,235 @@
+@model IEnumerable<NetworkManager.Models.Device>
+@{
+    ViewData["Title"] = "Dashboard";
+    int total = ViewBag.TotalDevices;
+    int online = ViewBag.OnlineDevices;
+    int offline = ViewBag.OfflineDevices;
+    int unknown = ViewBag.UnknownDevices;
+    int routers = ViewBag.RouterCount;
+    int switches = ViewBag.SwitchCount;
+    int servers = ViewBag.ServerCount;
+    int totalIps = ViewBag.TotalIps;
+    int assignedIps = ViewBag.AssignedIps;
+    int freeIps = ViewBag.FreeIps;
+    var offlineList = (List<NetworkManager.Models.Device>)ViewBag.OfflineList;
+    var recentLogs = (List<NetworkManager.Models.MaintenanceLog>)ViewBag.RecentLogs;
+}
+
+<!-- Stat Cards Row 1 -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-hdd-rack-fill"></i></div>
+            <div>
+                <div class="stat-value">@total</div>
+                <div class="stat-label">อุปกรณ์ทั้งหมด</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-wifi"></i></div>
+            <div>
+                <div class="stat-value" style="color:var(--success)">@online</div>
+                <div class="stat-label">Online</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-icon red"><i class="bi bi-wifi-off"></i></div>
+            <div>
+                <div class="stat-value" style="color:var(--danger)">@offline</div>
+                <div class="stat-label">Offline</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-icon gray"><i class="bi bi-question-circle"></i></div>
+            <div>
+                <div class="stat-value" style="color:var(--secondary)">@unknown</div>
+                <div class="stat-label">Unknown</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stat Cards Row 2 -->
+<div class="row g-3 mb-4">
+    <div class="col-md-2 col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-router"></i></div>
+            <div>
+                <div class="stat-value">@routers</div>
+                <div class="stat-label">Router</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-pc-display-horizontal"></i></div>
+            <div>
+                <div class="stat-value">@switches</div>
+                <div class="stat-label">Switch</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon cyan"><i class="bi bi-server"></i></div>
+            <div>
+                <div class="stat-value">@servers</div>
+                <div class="stat-label">Server</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon amber"><i class="bi bi-ethernet"></i></div>
+            <div>
+                <div class="stat-value">@totalIps</div>
+                <div class="stat-label">IP ทั้งหมด</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon red"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="stat-value">@assignedIps</div>
+                <div class="stat-label">IP ที่ใช้งาน</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon gray"><i class="bi bi-circle"></i></div>
+            <div>
+                <div class="stat-value">@freeIps</div>
+                <div class="stat-label">IP ว่าง</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tables Row -->
+<div class="row g-4">
+    <!-- Offline Devices -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <span><i class="bi bi-exclamation-triangle text-danger me-2"></i>อุปกรณ์ที่ Offline</span>
+                <a asp-controller="Devices" asp-action="Index" asp-route-status="Offline"
+                   class="btn btn-sm btn-outline-secondary">ดูทั้งหมด</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!offlineList.Any())
+                {
+                    <div class="empty-state py-5">
+                        <i class="bi bi-check-circle text-success d-block mb-2" style="font-size:36px"></i>
+                        <p>ทุกอุปกรณ์ทำงานปกติ 🎉</p>
+                    </div>
+                }
+                else
+                {
+                    <table class="table-custom w-100">
+                        <thead>
+                            <tr>
+                                <th>ชื่ออุปกรณ์</th>
+                                <th>IP</th>
+                                <th>ตรวจสอบล่าสุด</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var d in offlineList)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-controller="Devices" asp-action="Details" asp-route-id="@d.Id"
+                                           class="text-decoration-none fw-500">@d.Name</a>
+                                    </td>
+                                    <td><code>@d.IpAddress</code></td>
+                                    <td class="text-muted">
+                                        @(d.LastChecked?.ToString("HH:mm dd/MM/yy") ?? "—")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Maintenance Logs -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <span><i class="bi bi-tools text-primary me-2"></i>บันทึกการดูแลล่าสุด</span>
+                <a asp-controller="Maintenance" asp-action="Index"
+                   class="btn btn-sm btn-outline-secondary">ดูทั้งหมด</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!recentLogs.Any())
+                {
+                    <div class="empty-state py-5">
+                        <i class="bi bi-journal-text d-block mb-2" style="font-size:36px"></i>
+                        <p>ยังไม่มีบันทึกการดูแล</p>
+                    </div>
+                }
+                else
+                {
+                    <table class="table-custom w-100">
+                        <thead>
+                            <tr>
+                                <th>อุปกรณ์</th>
+                                <th>ประเภทงาน</th>
+                                <th>วันที่</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in recentLogs)
+                            {
+                                <tr>
+                                    <td>@log.Device?.Name</td>
+                                    <td>
+                                        <span class="work-badge work-@log.WorkType.ToString().ToLower()">
+                                            @log.WorkType
+                                        </span>
+                                    </td>
+                                    <td class="text-muted">@log.Date.ToString("dd/MM/yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-3 mt-2">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <span><i class="bi bi-lightning-fill text-warning me-2"></i>Quick Actions</span>
+            </div>
+            <div class="card-body d-flex gap-3 flex-wrap">
+                <a asp-controller="Devices" asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> เพิ่มอุปกรณ์ใหม่
+                </a>
+                <a asp-controller="IpAddress" asp-action="Create" class="btn btn-outline-primary">
+                    <i class="bi bi-ethernet"></i> เพิ่ม IP Address
+                </a>
+                <a asp-controller="Maintenance" asp-action="Create" class="btn btn-outline-secondary">
+                    <i class="bi bi-tools"></i> บันทึกการดูแล
+                </a>
+                <a asp-controller="Devices" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-list-ul"></i> รายการอุปกรณ์ทั้งหมด
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

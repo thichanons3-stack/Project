@@ -1,0 +1,90 @@
+@{
+    ViewData["Title"] = "เข้าสู่ระบบ";
+    Layout = "_Layout";
+}
+
+<div class="login-page">
+    <div class="login-card">
+        <div class="login-logo">
+            <i class="bi bi-diagram-3-fill"></i>
+            <h1>NetManager</h1>
+            <p>ระบบบริหารจัดการอุปกรณ์เครือข่ายและเซิร์ฟเวอร์</p>
+        </div>
+
+        <form asp-action="Login" method="post" id="loginForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    @Html.ValidationSummary(true)
+                </div>
+            }
+
+            <div class="mb-3">
+                <label class="form-label" for="username">
+                    <i class="bi bi-person me-1"></i>ชื่อผู้ใช้งาน
+                </label>
+                <input type="text" id="username" name="username" class="form-control"
+                       placeholder="กรอก username" autocomplete="username" required />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label" for="password">
+                    <i class="bi bi-lock me-1"></i>รหัสผ่าน
+                </label>
+                <div class="position-relative">
+                    <input type="password" id="password" name="password" class="form-control pe-5"
+                           placeholder="กรอกรหัสผ่าน" autocomplete="current-password" required />
+                    <button type="button" class="btn-toggle-pw" id="togglePw">
+                        <i class="bi bi-eye" id="togglePwIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-box-arrow-in-right"></i>
+                เข้าสู่ระบบ
+            </button>
+
+            <div class="mt-3 text-center" style="font-size:12px;color:var(--text-muted)">
+                <i class="bi bi-info-circle me-1"></i>
+                Default: admin / Admin@1234
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.btn-toggle-pw {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 15px;
+}
+.btn-toggle-pw:hover { color: var(--primary); }
+</style>
+
+@section Scripts {
+<script>
+document.getElementById('togglePw').addEventListener('click', function() {
+    const pw = document.getElementById('password');
+    const icon = document.getElementById('togglePwIcon');
+    if (pw.type === 'password') {
+        pw.type = 'text';
+        icon.classList.replace('bi-eye', 'bi-eye-slash');
+    } else {
+        pw.type = 'password';
+        icon.classList.replace('bi-eye-slash', 'bi-eye');
+    }
+});
+</script>
+}
